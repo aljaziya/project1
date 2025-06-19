@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Book Flight - Oman Air</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f9fc;
+      margin: 0; padding: 0;
+    }
+    header {
+      background-color: #006699;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+    }
+    .container {
+      max-width: 700px;
+      margin: 30px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #006699;
+    }
+    .flight-info, .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .seat-selection {
+      margin-bottom: 20px;
+    }
+    .seats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .seat {
+      background-color: #eee;
+      padding: 10px;
+      text-align: center;
+      border-radius: 5px;
+      cursor: pointer;
+      user-select: none;
+      font-weight: bold;
+      color: #333;
+    }
+    .seat.selected {
+      background-color: #006699;
+      color: white;
+    }
+    button {
+      width: 100%;
+      padding: 15px;
+      background-color: #006699;
+      color: white;
+      font-size: 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #004466;
+    }
+    .confirmation {
+      background-color: #e6ffe6;
+      border: 1px solid #00aa00;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 5px;
+      color: #006600;
+    }
+    #boardingPass {
+      margin-top: 20px;
+      padding: 15px;
+      border: 2px dashed #006699;
+      border-radius: 8px;
+      background-color: #e6f2f8;
+      color: #003366;
+    }
+    #boardingPass h3 {
+      color: #006699;
+      margin-top: 0;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    #boardingPass p {
+      margin: 5px 0;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<header>Oman Air - Book Your Flight</header>
+
+<div class="container">
+  <h2>Passenger Details</h2>
+  <div class="flight-info" id="flightInfo"></div>
+
+  <form id="bookingForm">
+    <div class="form-group">
+      <label for="fullName">Full Name</label>
+      <input type="text" id="fullName" required />
+    </div>
+    <div class="form-group">
+      <label for="civilId">Civil ID</label>
+      <input type="text" id="civilId" required />
+    </div>
+    <div class="form-group">
+      <label for="dob">Date of Birth</label>
+      <input type="date" id="dob" required />
+    </div>
+    <div class="form-group">
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" required />
+    </div>
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" required />
+    </div>
+
+    <div class="seat-selection">
+      <label>Select Your Seat</label>
+      <div class="seats" id="seatGrid"></div>
+    </div>
+
+    <button type="submit">Confirm Booking</button>
+  </form>
+
+  <div id="confirmation" class="confirmation" style="display:none;">
+    ✅ Booking confirmed! Thank you for flying with Oman Air.
+
+    <div id="boardingPass">
+      <h3>Your Boarding Pass</h3>
+      <p><strong>Passenger:</strong> <span id="bpName"></span></p>
+      <p><strong>Flight:</strong> <span id="bpFlight"></span></p>
+      <p><strong>From:</strong> <span id="bpFrom"></span></p>
+      <p><strong>To:</strong> <span id="bpTo"></span></p>
+      <p><strong>Date:</strong> <span id="bpDate"></span></p>
+      <p><strong>Time:</strong> <span id="bpTime"></span></p>
+      <p><strong>Seat:</strong> <span id="bpSeat"></span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Load selected flight from localStorage or fallback
+  const flight = JSON.parse(localStorage.getItem("selectedFlight")) || {
+    flightNumber: "WY101",
+    from: "Muscat",
+    to: "Dubai",
+    date: "2025-06-10",
+    time: "09:00",
+    price: "150 OMR"
+  };
+
+  // Display flight info
+  const flightInfoDiv = document.getElementById("flightInfo");
+  flightInfoDiv.innerHTML = `
+    <p><strong>Flight Number:</strong> ${flight.flightNumber}</p>
+    <p><strong>From:</strong> ${flight.from}</p>
+    <p><strong>To:</strong> ${flight.to}</p>
+    <p><strong>Date:</strong> ${flight.date}</p>
+    <p><strong>Time:</strong> ${flight.time}</p>
+    <p><strong>Price:</strong> ${flight.price}</p>
+  `;
+
+  const seatGrid = document.getElementById("seatGrid");
+  const seatList = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4"];
+  let selectedSeat = null;
+
+  // Render seats
+  seatList.forEach(seat => {
+    const seatEl = document.createElement("div");
+    seatEl.classList.add("seat");
+    seatEl.textContent = seat;
+    seatEl.addEventListener("click", () => {
+      document.querySelectorAll(".seat").forEach(s => s.classList.remove("selected"));
+      seatEl.classList.add("selected");
+      selectedSeat = seat;
+    });
+    seatGrid.appendChild(seatEl);
+  });
+
+  // Handle form submission
+  document.getElementById("bookingForm").addEventListener("submit", e => {
+    e.preventDefault();
+
+    if (!selectedSeat) {
+      alert("Please select a seat.");
+      return;
+    }
+
+    const passenger = {
+      fullName: document.getElementById("fullName").value,
+      civilId: document.getElementById("civilId").value,
+      dob: document.getElementById("dob").value,
+      phone: document.getElementById("phone").value,
+      email: document.getElementById("email").value,
+    };
+
+    const bookingData = {
+      flight,
+      passenger,
+      seat: selectedSeat,
+      bookingTime: new Date().toISOString()
+    };
+
+    // Save booking data if needed
+    localStorage.setItem("bookingData", JSON.stringify(bookingData));
+
+    // Show confirmation and boarding pass
+    document.getElementById("confirmation").style.display = "block";
+
+    document.getElementById("bpName").textContent = passenger.fullName;
+    document.getElementById("bpFlight").textContent = flight.flightNumber;
+    document.getElementById("bpFrom").textContent = flight.from;
+    document.getElementById("bpTo").textContent = flight.to;
+    document.getElementById("bpDate").textContent = flight.date;
+    document.getElementById("bpTime").textContent = flight.time;
+    document.getElementById("bpSeat").textContent = selectedSeat;
+
+    // Hide the form to prevent multiple submissions
+    e.target.style.display = "none";
+  });
+</script>
+
+</body>
+</html>

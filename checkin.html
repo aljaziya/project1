@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Check-In</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #e0f7ff, #b3e5fc);
+      padding: 40px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #2a5672;
+    }
+    input, button, select {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 14px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .seat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .seat {
+      padding: 10px;
+      text-align: center;
+      background-color: #ccc;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .seat.selected {
+      background-color: #4caf50;
+      color: white;
+    }
+    .boarding-pass {
+      background-color: #f0fff0;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 10px;
+      border: 1px dashed #4caf50;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Flight Check-In</h2>
+    <div id="checkin-form">
+      <input type="text" id="name" placeholder="Full Name" required />
+      <input type="text" id="civilid" placeholder="Civil ID" required />
+      <input type="text" id="flight" placeholder="Flight Number" required />
+      <input type="date" id="date" required />
+      <button onclick="verifyBooking()">Check In</button>
+    </div>
+
+    <div id="seat-selection" style="display:none;">
+      <h3>Select Your Seat</h3>
+      <div class="seat-grid" id="seats"></div>
+      <button onclick="confirmCheckin()">Confirm Check-In</button>
+    </div>
+
+    <div id="boarding-pass" style="display:none;">
+      <h3>Boarding Pass</h3>
+      <div class="boarding-pass" id="pass-info"></div>
+    </div>
+  </div>
+
+  <script>
+    function verifyBooking() {
+      const name = document.getElementById('name').value;
+      const civilid = document.getElementById('civilid').value;
+      const flight = document.getElementById('flight').value;
+      const date = document.getElementById('date').value;
+
+      // Simple validation (you can enhance this or check against stored bookings)
+      if (name && civilid && flight && date) {
+        document.getElementById('checkin-form').style.display = 'none';
+        generateSeats();
+        document.getElementById('seat-selection').style.display = 'block';
+      } else {
+        alert('Please fill in all fields.');
+      }
+    }
+
+    function generateSeats() {
+      const seatGrid = document.getElementById('seats');
+      seatGrid.innerHTML = '';
+      for (let i = 1; i <= 12; i++) {
+        const seat = document.createElement('div');
+        seat.className = 'seat';
+        seat.textContent = 'Seat ' + i;
+        seat.onclick = function () {
+          document.querySelectorAll('.seat').forEach(s => s.classList.remove('selected'));
+          seat.classList.add('selected');
+        };
+        seatGrid.appendChild(seat);
+      }
+    }
+
+    function confirmCheckin() {
+      const selectedSeat = document.querySelector('.seat.selected');
+      if (!selectedSeat) {
+        alert('Please select a seat.');
+        return;
+      }
+
+      const name = document.getElementById('name').value;
+      const flight = document.getElementById('flight').value;
+      const date = document.getElementById('date').value;
+
+      const passInfo = document.getElementById('pass-info');
+      passInfo.innerHTML = `
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Flight:</strong> ${flight}</p>
+        <p><strong>Date:</strong> ${date}</p>
+        <p><strong>Seat:</strong> ${selectedSeat.textContent}</p>
+        <p><strong>Status:</strong> Checked In</p>
+      `;
+
+      document.getElementById('seat-selection').style.display = 'none';
+      document.getElementById('boarding-pass').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Available Flights - Oman Air</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f9fc;
+      margin: 20px;
+    }
+    h1 {
+      color: #006699;
+      text-align: center;
+    }
+    .flight {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      margin: 15px auto;
+      max-width: 700px;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .flight-details p {
+      margin: 5px 0;
+      color: #003366;
+    }
+    button {
+      background-color: #006699;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #004466;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Available Flights</h1>
+  <div id="flightsContainer"></div>
+
+  <script>
+    // Predefined flights
+    const defaultFlights = [
+      { flightNumber: "WY101", from: "Muscat", to: "Dubai", date: "2025-06-10", time: "09:00", price: "150 OMR" },
+      { flightNumber: "WY202", from: "Muscat", to: "Abu Dhabi", date: "2025-06-11", time: "14:30", price: "170 OMR" },
+      { flightNumber: "WY303", from: "Muscat", to: "Doha", date: "2025-06-12", time: "18:00", price: "160 OMR" }
+    ];
+
+    // Admin-created flights
+    const adminFlights = JSON.parse(localStorage.getItem("flights")) || [];
+
+    // User's search input from index.html
+    const search = JSON.parse(localStorage.getItem("flightSearch"));
+
+    // Combine all flights
+    const allFlights = [...defaultFlights, ...adminFlights];
+
+    const container = document.getElementById("flightsContainer");
+
+    // Filter based on search criteria
+    const filteredFlights = allFlights.filter(flight =>
+      flight.from.toLowerCase() === search.from.toLowerCase() &&
+      flight.to.toLowerCase() === search.to.toLowerCase() &&
+      flight.date === search.depDate
+    );
+
+    // Show results
+    if (filteredFlights.length === 0) {
+      container.innerHTML = "<p style='text-align:center; color:#888;'>No flights matched your search.</p>";
+    } else {
+      filteredFlights.forEach(flight => {
+        const div = document.createElement("div");
+        div.className = "flight";
+        div.innerHTML = `
+          <div class="flight-details">
+            <p><strong>Flight Number:</strong> ${flight.flightNumber || "N/A"}</p>
+            <p><strong>From:</strong> ${flight.from}</p>
+            <p><strong>To:</strong> ${flight.to}</p>
+            <p><strong>Date:</strong> ${flight.date}</p>
+            <p><strong>Time:</strong> ${flight.time}</p>
+            <p><strong>Price:</strong> ${flight.price || "Not set"}</p>
+          </div>
+          <button onclick="bookFlight('${flight.flightNumber || "custom"}')">Book</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Save selected flight and go to book.html
+    function bookFlight(flightNumber) {
+      const selectedFlight = allFlights.find(f => f.flightNumber === flightNumber);
+      if (selectedFlight) {
+        localStorage.setItem("selectedFlight", JSON.stringify(selectedFlight));
+        window.location.href = "book.html";
+      }
+    }
+  </script>
+
+</body>
+</html>
